@@ -26,6 +26,10 @@ object Poodle {
     write(chunk)
   }
 
+  def deserializeChunk(str: String)(implicit formats: Formats = Serialization.formats(NoTypeHints)): Chunk = {
+    read[Chunk](str)
+  }
+
   // remember cookie ?
 
   // create initial chunk

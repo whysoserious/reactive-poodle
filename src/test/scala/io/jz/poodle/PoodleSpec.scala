@@ -22,5 +22,12 @@ class PoodleSpec extends FlatSpec with Matchers {
       """{"payload":[100,117,112,97],"parentLocation":{"storyId":1,"commentPage":2,"commentId":"łóźć√"}}""")
   }
 
+  it should "deserialize Chunk" in {
+    val Chunk(payload, location) = deserializeChunk(
+      """{"payload":[100,117,112,97],"parentLocation":{"storyId":1,"commentPage":2,"commentId":"łóźć√"}}""")
+    new String(payload) should equal ("dupa")
+    location should equal (Some(Location(1, 2, "łóźć√")))
+  }
+
 
 }
