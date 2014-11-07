@@ -11,7 +11,7 @@ class PoodleSpec extends FlatSpec with Matchers {
   import Poodle._
 
   "Poodle" should "generate random storyId" in {
-    val randomStoryId = randomStoryIdFun(1, 10)(new Random(1))
+    val randomStoryId = randomStoryIdFun(1, 10, new Random(1))
     randomStoryId() should equal (7)
     randomStoryId() should equal (2)
     randomStoryId() should equal (2)

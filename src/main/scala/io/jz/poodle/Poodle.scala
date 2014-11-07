@@ -9,7 +9,7 @@ object Poodle {
   // split stream to fixed size chunks
 
   // get random story id
-  def randomStoryIdFun(from: Int, to: Int)(random: Random = new Random): () => Int = {
+  def randomStoryIdFun(from: Int, to: Int, random: Random = new Random): () => Int = {
     () => random.nextInt(to - from) + from
   }
 
