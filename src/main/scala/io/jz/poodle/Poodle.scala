@@ -1,5 +1,7 @@
 package io.jz.poodle
 
+import java.security.MessageDigest
+
 import org.json4s.{Formats, NoTypeHints}
 import org.json4s.jackson.Serialization
 
@@ -37,6 +39,11 @@ object Poodle {
   // create chunk with location
 
   // encode chunk with SHA-1
+  def encryptSha1Fun(salt: String): String => Array[Byte] = {
+    input =>
+      val md: MessageDigest = MessageDigest.getInstance("SHA")
+      md.digest((salt + input).getBytes)
+  }
 
   // encode chunk with Base 64
 

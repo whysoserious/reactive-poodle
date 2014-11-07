@@ -42,4 +42,9 @@ class PoodleSpec extends FlatSpec with Matchers {
     location shouldBe empty
   }
 
+  it should "encrypt string with SHA-1" in {
+    encryptSha1Fun("salt")("dupa") should equal (
+      Array(33, 72, -91, 59, -6, 52, -38, 103, 70, 64, -26, -19, -63, 38, -17, 99, -20, -8, -38, -21))
+  }
+
 }
