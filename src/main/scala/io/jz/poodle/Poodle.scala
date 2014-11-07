@@ -1,19 +1,36 @@
-package io.jz.poodle.poodle
+package io.jz.poodle
+
+import org.json4s.{Formats, NoTypeHints}
+import org.json4s.jackson.Serialization
 
 import scala.util.Random
+import org.json4s.jackson.Serialization.{read, write}
 
 object Poodle {
 
+  case class Location(storyId: Int, commentPage: Int, commentId: String)
+
+  case class Chunk(payload: Array[Byte], parentLocation: Option[Location])
+
   // receive data as stream
 
-  // split stream to fixed size chunks
+  // slice stream to fixed size chunks
 
   // get random story id
   def randomStoryIdFun(from: Int, to: Int, random: Random = new Random): () => Int = {
     () => random.nextInt(to - from) + from
   }
 
+  //serialize chunk
+  def serializeChunk(chunk: Chunk)(implicit formats: Formats = Serialization.formats(NoTypeHints)): String = {
+    write(chunk)
+  }
+
   // remember cookie ?
+
+  // create initial chunk
+
+  // create chunk with location
 
   // encode chunk with SHA-1
 

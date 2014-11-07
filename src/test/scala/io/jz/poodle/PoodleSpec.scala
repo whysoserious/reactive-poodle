@@ -1,6 +1,5 @@
 package io.jz.poodle
 
-import io.jz.poodle.poodle.Poodle
 import org.scalatest.{Matchers, FlatSpec}
 
 import scala.util.Random
@@ -17,8 +16,10 @@ class PoodleSpec extends FlatSpec with Matchers {
     randomStoryId() should equal (2)
   }
 
-  it should "asdfasdf" in {
-    assert(true)
+  it should "serialize Chunk" in {
+    val chunk = Chunk("dupa".getBytes, Some(Location(1, 2, "łóźć√")))
+    serializeChunk(chunk) should equal (
+      """{"payload":[100,117,112,97],"parentLocation":{"storyId":1,"commentPage":2,"commentId":"łóźć√"}}""")
   }
 
 
