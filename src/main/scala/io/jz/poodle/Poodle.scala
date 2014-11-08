@@ -1,6 +1,8 @@
 package io.jz.poodle
 
 import java.security.MessageDigest
+import javax.crypto.spec.SecretKeySpec
+import javax.crypto.{Cipher, SecretKey, KeyGenerator}
 
 import org.json4s.{Formats, NoTypeHints}
 import org.json4s.jackson.Serialization
@@ -40,11 +42,22 @@ object Poodle {
 
   // create chunk with location
 
-  // encode chunk with SHA-1
-  def encrypt(salt: String): String => Array[Byte] = {
-    input =>
-      val md: MessageDigest = MessageDigest.getInstance("SHA")
-      md.digest((salt + input).getBytes)
+  def encryptFun(algorithmName: String, secret: String): Array[Byte] => Array[Byte] = {
+    val secretKey = new SecretKeySpec(secret.getBytes("UTF-8"), algorithmName)
+    val encipher = Cipher.getInstance(algorithmName + "/ECB/PKCS5Padding")
+    bytes: Array[Byte] => {
+      encipher.init(Cipher.ENCRYPT_MODE, secretKey)
+      encipher.doFinal(bytes)
+    }
+  }
+
+  def decryptFun(algorithmName: String, secret: String): Array[Byte] => Array[Byte] = {
+    val secretKey = new SecretKeySpec(secret.getBytes("UTF-8"), algorithmName)
+    val encipher = Cipher.getInstance(algorithmName + "/ECB/PKCS5Padding")
+    bytes: Array[Byte] => {
+      encipher.init(Cipher.DECRYPT_MODE, secretKey)
+      encipher.doFinal(bytes)
+    }
   }
 
   // encode chunk with Base 64

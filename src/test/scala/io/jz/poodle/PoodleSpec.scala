@@ -1,5 +1,9 @@
 package io.jz.poodle
 
+import java.security.{Security, SecureRandom}
+import javax.crypto.spec.{IvParameterSpec, SecretKeySpec, PBEKeySpec}
+import javax.crypto.{SecretKeyFactory, KeyGenerator, Cipher}
+
 import org.scalatest.{Matchers, FlatSpec}
 
 import scala.util.Random
@@ -42,9 +46,16 @@ class PoodleSpec extends FlatSpec with Matchers {
     location shouldBe empty
   }
 
-  it should "encrypt string with SHA-1" in {
-    encryptSha1Fun("salt")("dupa") should equal (
-      Array(33, 72, -91, 59, -6, 52, -38, 103, 70, 64, -26, -19, -63, 38, -17, 99, -20, -8, -38, -21))
+  it should "encrypt string with AES and with given secret" in {
+    encryptFun("AES", "0123456789012345")("dupa".getBytes) should equal(
+      Array(111, -2, -31, -119, -116, -113, 74, 101, 95, -20, 87, -83, -48, 26, 82, 105))
+  }
+
+  it should "decrypt string with AES and with given secret" in {
+    val actual: Array[Byte] = decryptFun("AES", "0123456789012345")(
+      Array[Byte](111, -2, -31, -119, -116, -113, 74, 101, 95, -20, 87, -83, -48, 26, 82, 105))
+    val expected = "dupa".getBytes
+    actual should equal(expected)
   }
 
 }

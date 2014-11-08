@@ -11,6 +11,8 @@ libraryDependencies ++= Seq(
   "io.spray" %% "spray-client" % "1.3.2",
   "com.typesafe.akka" %% "akka-stream-experimental" % "0.10",
   "org.json4s" %% "json4s-jackson" % "3.2.11",
+  "commons-codec" % "commons-codec" % "1.9",
   "org.scalatest" %% "scalatest" % "2.2.1" % "test")
 
 resolvers += "spray repo" at "http://repo.spray.io"
+
