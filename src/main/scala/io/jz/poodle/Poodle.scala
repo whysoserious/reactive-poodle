@@ -1,14 +1,14 @@
 package io.jz.poodle
 
-import java.security.MessageDigest
+import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
-import javax.crypto.{Cipher, SecretKey, KeyGenerator}
 
-import org.json4s.{Formats, NoTypeHints}
 import org.json4s.jackson.Serialization
+import org.json4s.jackson.Serialization.{read, write}
+import org.json4s.{Formats, NoTypeHints}
+import org.parboiled.common.Base64
 
 import scala.util.Random
-import org.json4s.jackson.Serialization.{read, write}
 
 object Poodle {
 
@@ -60,7 +60,13 @@ object Poodle {
     }
   }
 
-  // encode chunk with Base 64
+  def encodeBase64(bytes: Array[Byte]): String = {
+    Base64.rfc2045.encodeToString(bytes, false)
+  }
+
+  def decodeBase64(str: String): Array[Byte] = {
+    Base64.rfc2045.decode(str)
+  }
 
   // POST chunk as comment
 

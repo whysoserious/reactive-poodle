@@ -1,17 +1,13 @@
 package io.jz.poodle
 
-import java.security.{Security, SecureRandom}
-import javax.crypto.spec.{IvParameterSpec, SecretKeySpec, PBEKeySpec}
-import javax.crypto.{SecretKeyFactory, KeyGenerator, Cipher}
-
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.Random
 
 
 class PoodleSpec extends FlatSpec with Matchers {
 
-  import Poodle._
+  import io.jz.poodle.Poodle._
 
   "Poodle" should "generate random storyId" in {
     val randomStoryId = randomStoryIdFun(1, 10, new Random(1))
@@ -56,6 +52,14 @@ class PoodleSpec extends FlatSpec with Matchers {
       Array[Byte](111, -2, -31, -119, -116, -113, 74, 101, 95, -20, 87, -83, -48, 26, 82, 105))
     val expected = "dupa".getBytes
     actual should equal(expected)
+  }
+
+  it should "encode byte array to base64" in {
+    encodeBase64(Array[Byte](0, 2, 4, 101)) should equal ("AAIEZQ==")
+  }
+
+  it should "decode base64 string to byte array" in {
+    decodeBase64("AAIEZQ==") should equal (Array[Byte](0, 2, 4, 101))
   }
 
 }
