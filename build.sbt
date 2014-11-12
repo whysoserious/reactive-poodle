@@ -2,13 +2,17 @@ scalaVersion := "2.11.4"
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warnings", "-target:jvm-1.7")
 
+val sprayVersion = "1.3.2"
+
 libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.2.1",
   "com.typesafe.akka" %% "akka-actor" % "2.3.6",
   "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.6",
   "joda-time" % "joda-time" % "2.5",
   "org.joda" % "joda-convert" % "1.7",
-  "io.spray" %% "spray-client" % "1.3.2",
+  "io.spray" %% "spray-routing" % sprayVersion,
+  "io.spray" %% "spray-client" % sprayVersion,
+  "io.spray" %% "spray-testkit" % sprayVersion % "test",
   "com.typesafe.akka" %% "akka-stream-experimental" % "0.10",
   "org.json4s" %% "json4s-jackson" % "3.2.11",
   "commons-codec" % "commons-codec" % "1.9",
