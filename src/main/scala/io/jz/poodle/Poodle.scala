@@ -18,12 +18,10 @@ object Poodle {
 
   case class Chunk(payload: Array[Byte], parentLocation: Option[Location])
 
-  // get random story id
   def randomStoryIdFun(from: Int, to: Int, random: Random = new Random): () => Int = {
     () => random.nextInt(to - from) + from
   }
 
-  //serialize chunk
   def serializeChunk(chunk: Chunk)(implicit formats: Formats): String = {
     write(chunk)
   }
