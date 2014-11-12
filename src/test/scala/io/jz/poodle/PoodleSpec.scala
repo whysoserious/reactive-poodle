@@ -71,5 +71,11 @@ class PoodleSpec extends FlatSpec with Matchers {
     actual should equal("dupa")
   }
 
+  it should "return random UserAgent" in {
+    val randomUserAgent = randomUserAgentFun(random = new Random(2))
+    randomUserAgent() should equal ("""Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.104 Safari/537.36""")
+    randomUserAgent() should equal ("""Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.104 Safari/537.36""")
+    randomUserAgent() should equal ("""Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12B411 Safari/600.1.4""")
+  }
 
 }

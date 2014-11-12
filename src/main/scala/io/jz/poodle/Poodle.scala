@@ -18,10 +18,6 @@ object Poodle {
 
   case class Chunk(payload: Array[Byte], parentLocation: Option[Location])
 
-  // receive data as stream
-
-  // slice stream to fixed size chunks
-
   // get random story id
   def randomStoryIdFun(from: Int, to: Int, random: Random = new Random): () => Int = {
     () => random.nextInt(to - from) + from
@@ -35,12 +31,6 @@ object Poodle {
   def deserializeChunk(str: String)(implicit formats: Formats): Chunk = {
     read[Chunk](str)
   }
-
-  // remember cookie ?
-
-  // create initial chunk
-
-  // create chunk with location
 
   def encryptFun(algorithmName: String, secret: String): Array[Byte] => Array[Byte] = {
     val secretKey = new SecretKeySpec(secret.getBytes("UTF-8"), algorithmName)
@@ -68,14 +58,9 @@ object Poodle {
     Base64.rfc2045.decode(str)
   }
 
-  // POST chunk as comment
-
-  // memoize story_id, comment_page, comment_id
-
-  // POST chunk as comment with parent_story_id, parent_comment_page, parent_comment_id
-
-
-
-
+  def randomUserAgentFun(resourceName: String = "/user-agents", random: Random = new Random): () => String = {
+    lazy val userAgents = scala.io.Source.fromInputStream(getClass.getResourceAsStream(resourceName)).getLines().toSeq
+    () => userAgents(random.nextInt(userAgents.size))
+  }
 
 }

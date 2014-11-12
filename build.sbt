@@ -18,5 +18,7 @@ libraryDependencies ++= Seq(
   "commons-codec" % "commons-codec" % "1.9",
   "org.scalatest" %% "scalatest" % "2.2.1" % "test")
 
+resourceDirectories in Test += (resourceDirectory in Compile).value
+
 resolvers += "spray repo" at "http://repo.spray.io"
 
