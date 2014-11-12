@@ -62,4 +62,14 @@ class PoodleSpec extends FlatSpec with Matchers {
     decodeBase64("AAIEZQ==") should equal (Array[Byte](0, 2, 4, 101))
   }
 
+  it should "encrypt, encode, decode, decrypt a byte array" in {
+    val actual = new String(
+      decryptFun("AES", "0123456789012345")(
+        decodeBase64(
+          encodeBase64(
+            encryptFun("AES", "0123456789012345")("dupa".getBytes)))))
+    actual should equal("dupa")
+  }
+
+
 }
