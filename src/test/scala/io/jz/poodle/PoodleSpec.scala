@@ -1,6 +1,7 @@
 package io.jz.poodle
 
 import org.scalatest.{FlatSpec, Matchers}
+import spray.http.MediaTypes._
 
 import scala.util.Random
 
@@ -76,6 +77,18 @@ class PoodleSpec extends FlatSpec with Matchers {
     randomUserAgent() should equal ("""Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.104 Safari/537.36""")
     randomUserAgent() should equal ("""Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.104 Safari/537.36""")
     randomUserAgent() should equal ("""Mozilla/5.0 (iPhone; CPU iPhone OS 8_1 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12B411 Safari/600.1.4""")
+  }
+
+  it should "recognize MIME type from file name" in {
+    mimeType("a.jpg") should equal(`image/jpeg`)
+    mimeType("a.bmp") should equal(`image/x-ms-bmp`)
+    mimeType("a.exe") should equal(`application/octet-stream`)
+    mimeType("a.html") should equal(`text/html`)
+    mimeType("a.xxx") should equal(`application/octet-stream`)
+    mimeType("a.b.html") should equal(`text/html`)
+    mimeType("html") should equal(`application/octet-stream`)
+    mimeType("") should equal(`application/octet-stream`)
+    mimeType(" ") should equal(`application/octet-stream`)
   }
 
 }

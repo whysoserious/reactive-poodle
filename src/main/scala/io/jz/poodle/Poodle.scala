@@ -1,14 +1,23 @@
 package io.jz.poodle
 
+import java.nio.file.{Paths, Files}
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
+import akka.actor.ActorSystem
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.{read, write}
 import org.json4s.{Formats, NoTypeHints}
 import org.parboiled.common.Base64
+import spray.http.{MediaType, MediaTypes, HttpRequest}
+import spray.client.pipelining._
 
+import scala.concurrent.Future
 import scala.util.Random
+
+import spray.http.HttpHeaders._
+import spray.http.MediaRanges._
+import MediaTypes._
 
 object Poodle {
 
@@ -59,6 +68,17 @@ object Poodle {
   def randomUserAgentFun(resourceName: String = "/user-agents", random: Random = new Random): () => String = {
     lazy val userAgents = scala.io.Source.fromInputStream(getClass.getResourceAsStream(resourceName)).getLines().toSeq
     () => userAgents(random.nextInt(userAgents.size))
+  }
+
+  def mimeType: String => MediaType = {
+    lazy val ExtensionRegex = """^.*\.(.*)$""".r
+    lazy val defaultMimeType = `application/octet-stream`
+    filename: String => {
+      filename match {
+        case ExtensionRegex(extension) => forExtension(extension).getOrElse(defaultMimeType)
+        case _ => defaultMimeType
+      }
+    }
   }
 
 }
