@@ -11,19 +11,19 @@ object StreamingActor {
 
   // helper methods
   
-  def fromString(iterable: Iterable[String], ctx: RequestContext): Props = {
-    fromHttpData(iterable.map(HttpData.apply), ctx)
+  def propsFromString(iterable: Iterable[String], ctx: RequestContext): Props = {
+    propsFromHttpData(iterable.map(HttpData.apply), ctx)
   }
-  def fromStringAndCharset(iterable: Iterable[String], ctx: RequestContext, charset: HttpCharset): Props = {
-    fromHttpData(iterable.map(HttpData.apply), ctx)
+  def propsFromString(iterable: Iterable[String], ctx: RequestContext, charset: HttpCharset): Props = {
+    propsFromHttpData(iterable.map(HttpData.apply), ctx)
   }
-  def fromByteArray(iterable: Iterable[Array[Byte]], ctx: RequestContext): Props = {
-    fromHttpData(iterable.map(HttpData.apply), ctx)
+  def propsFromByteArray(iterable: Iterable[Array[Byte]], ctx: RequestContext): Props = {
+    propsFromHttpData(iterable.map(HttpData.apply), ctx)
   }
-  def fromByteString(iterable: Iterable[ByteString], ctx: RequestContext): Props = {
-    fromHttpData(iterable.map(HttpData.apply), ctx)
+  def propsFromByteString(iterable: Iterable[ByteString], ctx: RequestContext): Props = {
+    propsFromHttpData(iterable.map(HttpData.apply), ctx)
   }
-  def fromHttpData(iterable: Iterable[HttpData], ctx: RequestContext): Props = {
+  def propsFromHttpData(iterable: Iterable[HttpData], ctx: RequestContext): Props = {
     Props(new StreamingActor(iterable, ctx))
   }
   
