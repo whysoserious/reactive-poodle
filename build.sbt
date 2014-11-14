@@ -6,7 +6,7 @@ val sprayVersion = "1.3.2"
 
 libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.2.1",
-  "com.typesafe.akka" %% "akka-actor" % "2.3.6",
+  "com.typesafe.akka" %% "akka-actor" % "2.3.7",
   "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.6",
   "joda-time" % "joda-time" % "2.5",
   "org.joda" % "joda-convert" % "1.7",
