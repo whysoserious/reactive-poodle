@@ -18,12 +18,12 @@ object PoodleClient {
 
   class ChunkLocationUnmarshaller extends Deserializer[HttpResponse, ChunkLocation] {
 
-    lazy val PathRegexp = """/artykul/([0-9]+)/[^/]+/([0-9]+)/""".r
+    val PathRegexp = """/artykul/([0-9]+)/[^/]+/([0-9]+)/""".r
 
     override def apply(response: HttpResponse): Deserialized[ChunkLocation] = {
       val chunkLocation = for {
         Location(Uri(_, _, path, _, Some(commentId))) <- response.header[Location]
-        pr@PathRegexp(storyId, commentPage) <- PathRegexp.findFirstIn(path.toString())
+        pr @ PathRegexp(storyId, commentPage) <- PathRegexp.findFirstIn(path.toString())
       } yield {
         ChunkLocation(storyId.toInt, commentPage.toInt, commentId, pr)
       }
@@ -39,7 +39,7 @@ object PoodleClient {
 
 class PoodleClient(hostName: String = "www.pudelek.pl")(implicit system: ActorSystem) {
 
-  import PoodleClient._
+  import io.jz.poodle.PoodleClient._
   import system.dispatcher
 
   val randomUserAgent = randomUserAgentFun()
