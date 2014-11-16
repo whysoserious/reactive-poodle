@@ -18,9 +18,9 @@ class PoodleSpec extends FlatSpec with Matchers {
   }
 
   it should "serialize Chunk with Location" in {
-    val chunk = Chunk("dupa".getBytes, Some(Location(1, 2, "łóźć√")))
+    val chunk = Chunk("dupa".getBytes, Some(ChunkLocation(1, 2, "łóźć√", "pafik")))
     serializeChunk(chunk) should equal (
-      """{"payload":[100,117,112,97],"parentLocation":{"storyId":1,"commentPage":2,"commentId":"łóźć√"}}""")
+      """{"payload":[100,117,112,97],"parentLocation":{"storyId":1,"commentPage":2,"commentId":"łóźć√","path":"pafik"}}""")
   }
 
   it should "serialize Chunk without Location" in {
@@ -31,9 +31,9 @@ class PoodleSpec extends FlatSpec with Matchers {
 
   it should "deserialize Chunk with Location" in {
     val Chunk(payload, location) = deserializeChunk(
-      """{"payload":[100,117,112,97],"parentLocation":{"storyId":1,"commentPage":2,"commentId":"łóźć√"}}""")
+      """{"payload":[100,117,112,97],"parentLocation":{"storyId":1,"commentPage":2,"commentId":"łóźć√","path":"pafik"}}""")
     new String(payload) should equal ("dupa")
-    location should equal (Some(Location(1, 2, "łóźć√")))
+    location should equal (Some(ChunkLocation(1, 2, "łóźć√", "pafik")))
   }
 
   it should "deserialize Chunk without Location" in {

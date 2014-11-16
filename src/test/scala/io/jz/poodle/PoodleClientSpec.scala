@@ -28,14 +28,10 @@ class PoodleClientSpec extends FlatSpec with Matchers {
   }
 
   "PoodleClient" should "post a comment in a story and retrieve a Location" in withPoodleClient { poodleClient =>
-    val randomUserAgent: () => String = randomUserAgentFun()
-    poodleClient.postComment(73200, "co wy mówicie")
-//    poodleClient.getMainPage(randomUserAgent)
-//    poodleClient.getStory(73200, randomUserAgent)
+  //  poodleClient.postComment(73200, "o rabny..")
     1 === 1
   }
 
 
 
 }
-//akka.log-dead-letters-during-shutdown = off

@@ -23,9 +23,9 @@ object Poodle {
 
   implicit val formats: Formats = Serialization.formats(NoTypeHints)
 
-  case class Location(storyId: Int, commentPage: Int, commentId: String)
+  case class ChunkLocation(storyId: Int, commentPage: Int, commentId: String, path: String)
 
-  case class Chunk(payload: Array[Byte], parentLocation: Option[Location])
+  case class Chunk(payload: Array[Byte], parentLocation: Option[ChunkLocation])
 
   def randomStoryIdFun(from: Int, to: Int, random: Random = new Random): () => Int = {
     () => random.nextInt(to - from) + from
