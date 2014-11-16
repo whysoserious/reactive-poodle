@@ -28,7 +28,7 @@ class PoodleClientSpec extends FlatSpec with Matchers {
   }
 
   "PoodleClient" should "post a comment in a story and retrieve a Location" in withPoodleClient { poodleClient =>
-  //  poodleClient.postComment(73200, "o rabny..")
+    //poodleClient.postComment(73200, "kto jest panem", "zetos")
     1 === 1
   }
 

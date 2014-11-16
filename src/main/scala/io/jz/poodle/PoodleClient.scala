@@ -1,58 +1,52 @@
 package io.jz.poodle
 
-import java.util.concurrent.TimeUnit
-
 import akka.actor.ActorSystem
-import akka.util.Timeout
-import io.jz.poodle.Poodle.ChunkLocation
-import spray.http.Uri.Query
-
-import scala.concurrent.{Await, Future}
-
-import spray.http._
-import spray.httpx.encoding.{Gzip, Deflate}
-import spray.httpx.unmarshalling.{MalformedContent, Deserialized, Deserializer, FromResponseUnmarshaller}
+import io.jz.poodle.Poodle.{ChunkLocation, _}
 import spray.client.pipelining._
-
-import scala.concurrent.duration._
+import spray.http.CacheDirectives._
+import spray.http.HttpEncodings._
 import spray.http.HttpHeaders._
-import MediaTypes._
-import HttpEncodings._
-import CacheDirectives._
-import StatusCodes._
-import Poodle._
+import spray.http.MediaTypes._
+import spray.http.Uri.Query
+import spray.http._
+import spray.httpx.encoding.{Deflate, Gzip}
+import spray.httpx.unmarshalling.{Deserialized, Deserializer, MalformedContent}
 
-class ChunkLocationUnmarshaller extends Deserializer[HttpResponse, ChunkLocation] {
-  lazy val PathRegexp = """/artykul/([0-9]+)/[^/]+/([0-9]+)/""".r
-  override def apply(response: HttpResponse): Deserialized[ChunkLocation] = {
-    val chunkLocation = response match {
-      case r: HttpResponse if r.status == Found =>
-        r.header[Location] map {
-          case Location(Uri(_, _, path, _, Some(commentId))) =>
-            PathRegexp.findFirstIn(path.toString()) match {
-              case Some(PathRegexp(storyId, commentPage)) =>
-                ChunkLocation(storyId.toInt, commentPage.toInt, commentId, path.toString)
-            }
-        }
+import scala.concurrent.Future
+
+object PoodleClient {
+
+  class ChunkLocationUnmarshaller extends Deserializer[HttpResponse, ChunkLocation] {
+
+    lazy val PathRegexp = """/artykul/([0-9]+)/[^/]+/([0-9]+)/""".r
+
+    override def apply(response: HttpResponse): Deserialized[ChunkLocation] = {
+      val chunkLocation = for {
+        Location(Uri(_, _, path, _, Some(commentId))) <- response.header[Location]
+        pr@PathRegexp(storyId, commentPage) <- PathRegexp.findFirstIn(path.toString())
+      } yield {
+        ChunkLocation(storyId.toInt, commentPage.toInt, commentId, pr)
+      }
+      chunkLocation match {
+        case Some(cl) => Right(cl)
+        case None => Left(MalformedContent("Invalid Location header: " + response.header[Location]))
+      }
     }
-    println ("CL >>>" + chunkLocation)
-    chunkLocation match {
-      case Some(cl) => Right(cl)
-      case None => Left(MalformedContent("dupa"))
-    }
+
   }
+
 }
 
 class PoodleClient(hostName: String = "www.pudelek.pl")(implicit system: ActorSystem) {
 
+  import PoodleClient._
   import system.dispatcher
 
   val randomUserAgent = randomUserAgentFun()
 
-  implicit val x = new ChunkLocationUnmarshaller
+  implicit val chunkLocationUnmarshaller = new ChunkLocationUnmarshaller
 
-  def postComment(storyId: Int, body: String, nick: String = "gośću"): Future[Option[ChunkLocation]] = {
-
+  def postComment(storyId: Int, body: String, nick: String = "gość"): Future[ChunkLocation] = {
     val pipeline: HttpRequest => Future[ChunkLocation] = (
       addHeaders(
         Accept(`text/html`, `application/xhtml+xml`, `image/webp`),
@@ -84,32 +78,7 @@ class PoodleClient(hostName: String = "www.pudelek.pl")(implicit system: ActorSy
       host = hostName,
       path = "/komentarz")
     val postRequest = Post(uri, HttpEntity(`application/x-www-form-urlencoded`, payload))
-    val chunkLocation = pipeline(postRequest)
-    implicit val timeout = Timeout(10, TimeUnit.SECONDS)
-    val response = Await.result(chunkLocation, 10.seconds)
-    Future.successful(None)
+    pipeline(postRequest)
   }
 
-  //  def getStory(storyId: Int): Unit = {
-  //    val uri = Uri.from(
-  //      scheme = "http",
-  //      host = "www.pudelek.pl",
-  //      path = s"/artykul/$storyId")
-  //    val request = pipeline()(Get(uri))
-  //    implicit val timeout = Timeout(10, TimeUnit.SECONDS)
-  //    val response = Await.result(request, 10.seconds)
-  //
-  //    response.headers foreach {  h => println(">>> " + h) }
-  //    println(">>> " + response.entity.asString.take(200))
-  //  }
-  //
-  //  def getMainPage(userAgent: () => String): Unit = {
-  //    val uri = Uri.from(
-  //      scheme = "http",
-  //      host = "www.pudelek.pl")
-  //    implicit val timeout = Timeout(10, TimeUnit.SECONDS)
-  //    val response = Await.result(pipeline()(Get(uri)), 10.seconds)
-  //    response.headers foreach {  h => println(">>> " + h) }
-  //    println(">>> " + response.entity.asString.take(200))
-  //  }
 }
