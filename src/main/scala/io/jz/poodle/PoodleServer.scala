@@ -2,48 +2,61 @@ package io.jz.poodle
 
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
+import spray.http.HttpHeaders.`Content-Type`
+import spray.http.StatusCodes._
 import spray.routing.{Route, SimpleRoutingApp}
 
 object PoodleServer extends App with SimpleRoutingApp {
+
+  //TODO save or guess Content-type
+  //Header Chunk must contain Contente-Type and filename
+  //  Server: Microsoft-IIS/8.5
+  //  X-Powered-By: ASP.NET
+  //  X-Powered-By: ARR/2.5
+  // get / path
 
   val config = ConfigFactory.parseString(
     """
       |akka.loglevel = DEBUG
       |akka.stdout-loglevel = DEBUG
       |akka.log-dead-letters = off
+      |spray.can.server.request-chunk-aggregation-limit = 0
     """.stripMargin)
 
   implicit val actorSystem = ActorSystem("PoodleServer", config)
 
-  lazy val indexRoute = {
+  lazy val staticRoute = {
     get {
       path("") {
-        complete {
-          <html>
-            <form action="/file-upload" method="post" enctype="multipart/form-data">
-              <input type="file" name="userfile" />
-              <button name="upload" type="submit" value="Submit" />
-            </form>
-          </html>
-        }
+        getFromResource("index.html")
+      } ~
+      path("jquery.js") {
+        getFromResource("jquery-2.1.1.min.js")
+      } ~
+      path("file-upload.js") {
+        getFromResource("file-upload.js")
       }
     }
   }
 
   lazy val uploadRoute = {
-    post {
+    put {
       path("file-upload") {
         logRequest("file-upload") {
-          complete {
-            "ok"
-          }
+          ctx =>
+//            ctx.request.asPartStream() foreach {
+//              x => println("C >>> " + x)
+//            }
+            ctx.complete(OK)
         }
       }
     }
   }
 
+
+
   startServer(interface = "localhost", port = 8080) {
-    indexRoute ~ uploadRoute
+    staticRoute ~ uploadRoute
   }
 
 }

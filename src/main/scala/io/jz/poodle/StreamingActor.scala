@@ -37,7 +37,7 @@ object StreamingActor {
 
 class StreamingActor(chunks: Iterable[HttpData], ctx: RequestContext) extends Actor with HttpService with ActorLogging {
 
-  import io.jz.poodle.StreamingActor._
+  import StreamingActor._
 
   def actorRefFactory = context
 
@@ -72,46 +72,3 @@ class StreamingActor(chunks: Iterable[HttpData], ctx: RequestContext) extends Ac
   }
 
 }
-
-//object ChunkedSpray extends App with SimpleRoutingApp {
-//
-//  import io.jz.poodle.StreamingActor._
-//
-//  implicit val actorSystem = ActorSystem()
-//
-//  lazy val stream: Stream[String] = "first" #:: "second" #:: "third" #:: Stream.empty
-//
-//  lazy val emptyStream: Stream[Array[Byte]] = Stream.empty
-//
-//  startServer(interface = "localhost", port = 8080) {
-//    get {
-//      path("stream") {
-//        ctx =>
-//          actorRefFactory.actorOf(fromString(stream, ctx))
-//      } ~
-//      path("empty-stream") {
-//        ctx =>
-//          actorRefFactory.actorOf(fromByteArray(emptyStream, ctx))
-//      }
-//    }
-//  }
-//}
-//
-//~
-//path("hello") {
-//complete {
-//<html>
-//<form action="/upload" method="post" enctype="multipart/form-data">
-//<input type="file" name="userfile" />
-//<input type="text" name="imgdec" />
-//<button name="upload" type="submit" value="Submit" />
-//</form>
-//</html>
-//}
-//}
-//} ~
-//post {
-//path("upload") {
-//ctx =>
-//ctx.complete("OK")
-//}
