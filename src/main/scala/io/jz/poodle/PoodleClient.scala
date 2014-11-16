@@ -56,16 +56,15 @@ class PoodleClient(hostName: String = "www.pudelek.pl")(implicit system: ActorSy
         Connection("keep-alive"),
         Host(hostName),
         Origin(s"http://$hostName" :: Nil),
-        `User-Agent`(randomUserAgent())
-      ) ~> addHeader("DNT", "1")
+        `User-Agent`(randomUserAgent()))
+        ~> addHeader("DNT", "1")
         ~> addHeader("Referer", s"http://$hostName/artykul/$storyId/")
         ~> logRequest(system.log)
         ~> sendReceive
         ~> decode(Deflate)
         ~> decode(Gzip)
         ~> logResponse(system.log)
-        ~> unmarshal[ChunkLocation]
-      )
+        ~> unmarshal[ChunkLocation])
     val payload = Query(
       "article_comment[aid]" -> storyId.toString,
       "article_comment[sid]" -> "",
