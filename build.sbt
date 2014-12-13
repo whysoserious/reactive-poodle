@@ -19,6 +19,3 @@ libraryDependencies ++= Seq(
 )
 
 resourceDirectories in Test += (resourceDirectory in Compile).value
-
-resolvers += "spray repo" at "http://repo.spray.io"
-
