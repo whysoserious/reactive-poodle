@@ -12,3 +12,6 @@ project/plugins/project/
 .scala_dependencies
 .worksheet
 .idea/
+.ensime
+.ensime_cache/
+.projectile
