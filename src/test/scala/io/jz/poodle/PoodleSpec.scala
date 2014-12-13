@@ -1,7 +1,11 @@
 package io.jz.poodle
 
+import akka.util.ByteString
 import org.scalatest.{FlatSpec, Matchers}
-import spray.http.MediaTypes._
+import akka.http.model.MediaTypes._
+import org.json4s._
+import org.json4s.jackson.Serialization
+import org.json4s.jackson.Serialization.{read, write}
 
 import scala.util.Random
 
@@ -17,30 +21,24 @@ class PoodleSpec extends FlatSpec with Matchers {
     randomStoryId() should equal (2)
   }
 
-  it should "serialize Chunk with Location" in {
-    val chunk = Chunk("dupa".getBytes, Some(ChunkLocation(1, 2, "łóźć√", "pafik")))
-    serializeChunk(chunk) should equal (
-      """{"payload":[100,117,112,97],"parentLocation":{"storyId":1,"commentPage":2,"commentId":"łóźć√","path":"pafik"}}""")
+  it should "serialize ByteString" in {
+    write(ByteString("dupa")) should equal ("[100,117,112,97]")
   }
 
-  it should "serialize Chunk without Location" in {
-    val chunk = Chunk("dupa".getBytes, None)
-    serializeChunk(chunk) should equal (
-      """{"payload":[100,117,112,97]}""")
+  it should "deserialize ByteString" in {
+    read[ByteString]("[100,117,112,97]") should equal (ByteString("dupa"))
   }
 
-  it should "deserialize Chunk with Location" in {
-    val Chunk(payload, location) = deserializeChunk(
-      """{"payload":[100,117,112,97],"parentLocation":{"storyId":1,"commentPage":2,"commentId":"łóźć√","path":"pafik"}}""")
-    new String(payload) should equal ("dupa")
-    location should equal (Some(ChunkLocation(1, 2, "łóźć√", "pafik")))
+  it should "deserialize ChunkLocation" in {
+    val actual = read[ChunkLocation]("""{"storyId":1,"commentPage":2,"commentId":"łóźć√","path":"pafik"}""")
+    val expected = ChunkLocation(1, 2, "łóźć√", "pafik")
+    actual should equal (expected)
   }
 
-  it should "deserialize Chunk without Location" in {
-    val Chunk(payload, location) = deserializeChunk(
-      """{"payload":[100,117,112,97]}""")
-    new String(payload) should equal ("dupa")
-    location shouldBe empty
+  it should "serialize ChunkLocation" in {
+    val actual = write(ChunkLocation(1, 2, "łóźć√", "pafik"))
+    val expected = """{"storyId":1,"commentPage":2,"commentId":"łóźć√","path":"pafik"}"""
+    actual should equal (expected)
   }
 
   it should "encrypt string with AES and with given secret" in {

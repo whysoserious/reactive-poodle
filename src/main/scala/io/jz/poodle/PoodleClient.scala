@@ -1,26 +1,29 @@
 package io.jz.poodle
 
 import akka.actor.ActorSystem
-import io.jz.poodle.Poodle.{ChunkLocation, _}
-import spray.client.pipelining._
-import spray.http.CacheDirectives._
-import spray.http.HttpEncodings._
-import spray.http.HttpHeaders._
-import spray.http.MediaTypes._
-import spray.http.Uri.Query
-import spray.http._
-import spray.httpx.encoding.{Deflate, Gzip}
-import spray.httpx.unmarshalling.{Deserialized, Deserializer, MalformedContent}
+import akka.http.Http
+import akka.http.client.RequestBuilding._
+import akka.http.model.MediaTypes._
+import akka.http.model.Uri.Query
+import akka.http.model._
+import akka.http.model.headers.CacheDirectives._
+import akka.http.model.headers.HttpEncodings._
+import akka.http.model.headers._
+import akka.http.unmarshalling._
+import akka.http.util._
+import akka.stream.FlowMaterializer
+import akka.stream.scaladsl.{Source, Sink}
+import io.jz.poodle.Poodle._
 
 import scala.concurrent.Future
+import scala.util._
 
 object PoodleClient {
 
-  class ChunkLocationUnmarshaller extends Deserializer[HttpResponse, ChunkLocation] {
+  val PathRegexp = """/artykul/([0-9]+)/[^/]+/([0-9]+)/""".r
 
-    val PathRegexp = """/artykul/([0-9]+)/[^/]+/([0-9]+)/""".r
-
-    override def apply(response: HttpResponse): Deserialized[ChunkLocation] = {
+  implicit val chunkLocationUnmarshaller = Unmarshaller[HttpResponse, ChunkLocation] { response =>
+    FastFuture {
       val chunkLocation = for {
         Location(Uri(_, _, path, _, Some(commentId))) <- response.header[Location]
         pr @ PathRegexp(storyId, commentPage) <- PathRegexp.findFirstIn(path.toString())
@@ -28,56 +31,60 @@ object PoodleClient {
         ChunkLocation(storyId.toInt, commentPage.toInt, commentId, pr)
       }
       chunkLocation match {
-        case Some(cl) => Right(cl)
-        case None => Left(MalformedContent("Invalid Location header: " + response.header[Location]))
+        case Some(cl) => Success(cl)
+        case None => Failure(new Exception("Invalid Location header: " + response.header[Location]))
       }
     }
-
   }
 
 }
 
-class PoodleClient(hostName: String = "www.pudelek.pl")(implicit system: ActorSystem) {
+class PoodleClient(hostName: String = "www.pudelek.pl", userAgent: () => String = randomUserAgentFun())
+                  (implicit system: ActorSystem) {
 
-  import io.jz.poodle.PoodleClient._
+  import PoodleClient._
   import system.dispatcher
 
-  val randomUserAgent = randomUserAgentFun()
+  implicit val fm: FlowMaterializer = FlowMaterializer()
 
-  implicit val chunkLocationUnmarshaller = new ChunkLocationUnmarshaller
+  def postChunk(storyId: Int, body: String, nick: String = "gość"): Future[ChunkLocation] = {
+    val connection = Http().outgoingConnection(hostName)
+    Source.singleton(request(storyId, body, nick))
+      .via(connection.flow)
+      .runWith(Sink.head)
+      .flatMap { Unmarshal(_).to[ChunkLocation] }
+  }
 
-  def postComment(storyId: Int, body: String, nick: String = "gość"): Future[ChunkLocation] = {
-    val pipeline: HttpRequest => Future[ChunkLocation] = (
-      addHeaders(
-        Accept(`text/html`, `application/xhtml+xml`, `image/webp`),
-        `Accept-Encoding`(gzip, deflate),
-        `Accept-Language`(Language("en", "US"), Language("en"), Language("pl")),
-        `Cache-Control`(`max-age`(0l)),
-        Connection("keep-alive"),
-        Host(hostName),
-        Origin(s"http://$hostName" :: Nil),
-        `User-Agent`(randomUserAgent()))
-        ~> addHeader("DNT", "1")
-        ~> addHeader("Referer", s"http://$hostName/artykul/$storyId/")
-        ~> logRequest(system.log)
-        ~> sendReceive
-        ~> decode(Deflate)
-        ~> decode(Gzip)
-        ~> logResponse(system.log)
-        ~> unmarshal[ChunkLocation])
-    val payload = Query(
+  protected def request(storyId: Int, body: String, nick: String): HttpRequest = {
+    val applyHeaders = Function.chain(
+      Seq(
+        addHeader(`User-Agent`(userAgent())),
+        addHeader(Accept(`text/html`, `application/xhtml+xml`, `image/webp`)),
+        addHeader(`Accept-Encoding`(gzip)),
+        addHeader(`Accept-Language`(Language("en", "US"), Language("en"), Language("pl"))),
+        addHeader(`Cache-Control`(`max-age`(0l))),
+        addHeader(Connection("keep-alive")),
+        addHeader(Host(hostName)),
+        addHeader(Origin(s"http://$hostName")),
+        addHeader("Referer", s"http://$hostName/artykul/$storyId/"),
+        addHeader("DNT", "1")
+      )
+    )
+    val payload = query(storyId, body, nick)
+    val uri = Uri.from(scheme = "http", host = hostName, path = "/komentarz")
+    val postRequest = Post(uri, HttpEntity(`application/x-www-form-urlencoded`, payload))
+    applyHeaders(postRequest)
+  }
+
+  protected def query(storyId: Int, body: String, nick: String): String = {
+    Query(
       "article_comment[aid]" -> storyId.toString,
       "article_comment[sid]" -> "",
       "article_comment[response_to]" -> "",
       "article_comment[response_bucket]" -> "",
       "article_comment[txt]" -> body,
-      "article_comment[aut]" -> nick).toString()
-    val uri = Uri.from(
-      scheme = "http",
-      host = hostName,
-      path = "/komentarz")
-    val postRequest = Post(uri, HttpEntity(`application/x-www-form-urlencoded`, payload))
-    pipeline(postRequest)
+      "article_comment[aut]" -> nick
+    ).toString()
   }
 
 }
