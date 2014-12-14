@@ -4,6 +4,10 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-Xfatal-warning
 
 val sprayVersion = "1.3.2"
 
+Defaults.itSettings
+
+lazy val root = project.in(file(".")).configs(IntegrationTest)
+
 libraryDependencies ++= Seq(
   "com.typesafe" % "config" % "1.2.1",
   "com.typesafe.akka" %% "akka-actor" % "2.3.7",
@@ -15,7 +19,7 @@ libraryDependencies ++= Seq(
   "net.sourceforge.htmlcleaner" % "htmlcleaner" % "2.6",
   "org.joda" % "joda-convert" % "1.7",
   "org.json4s" %% "json4s-jackson" % "3.2.11",
-  "org.scalatest" %% "scalatest" % "2.2.1" % "test"
+  "org.scalatest" %% "scalatest" % "2.2.1" % "test, it"
 )
 
 resourceDirectories in Test += (resourceDirectory in Compile).value

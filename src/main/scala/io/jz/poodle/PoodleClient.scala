@@ -49,10 +49,14 @@ class PoodleClient(hostName: String = "www.pudelek.pl", userAgent: () => String 
 
   def postChunk(storyId: Int, body: String, nick: String = "gość"): Future[ChunkLocation] = {
     val connection = Http().outgoingConnection(hostName)
-    Source.singleton(request(storyId, body, nick))
+    val fu = Source.singleton(request(storyId, body, nick))
       .via(connection.flow)
       .runWith(Sink.head)
       .flatMap { Unmarshal(_).to[ChunkLocation] }
+    fu onComplete {
+      case x => println(">>>> " + x)
+    }
+    fu
   }
 
   protected def request(storyId: Int, body: String, nick: String): HttpRequest = {
